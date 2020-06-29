@@ -1,83 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import './transaction.dart';
+import 'package:personalexpensetracker/widgets/new_transaction.dart';
+
+import 'models/transaction.dart';
+import 'widgets/transaction_list.dart';
 
 void main() {
-  runApp(MyHomePage());
+  runApp(MyApp());
 }
 
-class MyHomePage extends StatelessWidget {
-  final List<Transaction> transactions = [
-    Transaction(id:"t1", title: "New Shoes", amount: 30, date: DateTime.now()),
-    Transaction(id:"T2", title: "Groceries", amount: 70, date: DateTime.now())
-  ];
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("Expense Planner App")),
-        body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Card(
-                child: Container(
-                  color: Colors.blue,
-                  width: double.infinity,
-                  child: Text("CHART!"),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+final List<Transaction> transactions = [
+    Transaction(id: "t1", title: "New Shoes", amount: 30, date: DateTime.now()),
+    Transaction(id: "T2", title: "Groceries", amount: 70, date: DateTime.now())
+  ];
+
+  void addNewTransaction(String title, double amount) {
+    final newTransaction = Transaction(id: DateTime.now().toString(),
+        title: title,
+        amount: amount,
+        date: DateTime.now());
+    setState(() {
+      transactions.add(newTransaction);
+    });
+  }
+
+  void openAddNewTransactionModal(BuildContext context) {
+    showModalBottomSheet(context: context, builder: (_) {
+      return NewTransaction(addNewTransaction);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Expense Planner App"),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                  Icons.add
+              ),
+              onPressed: () => openAddNewTransactionModal(context),
+
+            )
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Card(
+                  child: Container(
+                    color: Colors.blue,
+                    width: double.infinity,
+                    child: Text("CHART!"),
+                  ),
+                  elevation: 5,
                 ),
-                elevation: 5,
-              ),
-              Column(
-                children:
-                  transactions.map((transaction){
-                    return Card(
-                      child: Row(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.purple,
-                                width: 1
-                              )
-                            ),
-                            padding: EdgeInsets.all(10),
-                            child: Text(
-                              'R${transaction.amount}',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Colors.purple,
-                              ),
-                            ),
-                          ),
-
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                transaction.title,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                DateFormat("yMMMd").format(transaction.date),
-                                style: TextStyle(
-                                    color: Colors.grey
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      )
-                    );
-                  }).toList(),
-              ),
-
-        ]),
-      ),
+                Column(
+                    children: <Widget>[
+                      TransactionList(transactions),
+                    ]
+                ),
+              ]
+          )
+        ),
+        floatingActionButton: FloatingActionButton(
+            child: Icon(
+              Icons.add
+            ),
+            onPressed: () => openAddNewTransactionModal(context),
+        ),
     );
   }
 }
